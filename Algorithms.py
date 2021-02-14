@@ -1,10 +1,11 @@
 from graph_tool.all import *
+import numpy as np
 import random
 
-def algorithmOne(totalNetwork, resList, resCapList, substrateNetwork):
+def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
 
-    sortedResValList = sorted(resList, reverse=True)
-    sortedSbsValList = sorted(resCapList, reverse=True)
+    sortedResValList = sorted(resList, reverse=greedy_method)
+    sortedSbsValList = sorted(resCapList, reverse=greedy_method)
     sbsFoundVertex = 0
     numOfMappings = 0
     ranFoundVertex = 0
@@ -57,7 +58,7 @@ def algorithmOne(totalNetwork, resList, resCapList, substrateNetwork):
                     numOfMappings += 1
                     totalNetwork.vp.resourceCapacity[sbsFoundVertex[0]] -= totalNetwork.vertex_properties.resources[ranFoundVertex]
                     sortedSbsValList[0] = totalNetwork.vp.resourceCapacity[sbsFoundVertex[0]]
-                    sortedSbsValList = sorted(sortedSbsValList, reverse=True)
+                    sortedSbsValList = sorted(sortedSbsValList, reverse=greedy_method)
             else: # Mapping Case Two
 
                 selectedSbsTower = []
@@ -90,7 +91,9 @@ def algorithmOne(totalNetwork, resList, resCapList, substrateNetwork):
                     isFoundSbs = False
 
                     while True:
-                        if possibleSbsTower[0] in mappableSbsTowers or possibleSbsTower[0] in unmappableTowers:
+                        if not possibleSbsTower:
+                            break
+                        elif possibleSbsTower[0] in mappableSbsTowers or possibleSbsTower[0] in unmappableTowers:
                             possibleSbsTower.pop(0)
                         else:
                             break
@@ -119,7 +122,11 @@ def algorithmOne(totalNetwork, resList, resCapList, substrateNetwork):
                         selectedCounter += 1
                     else:
                         print("Resource not Satisfied Case Two")
-                        break
+                        unmappableTowers.add(possibleSbsTower[0])
+                        if greedy_method == True:
+                            break
+                        else:
+                            continue
                 
                 if foundSbsVert == False:
                     print("VNF Mapping Failure Rescource and Connection Issue")
@@ -181,77 +188,129 @@ def algorithmOne(totalNetwork, resList, resCapList, substrateNetwork):
                                 break
 
                         sortedSbsValList[sortCount] = totalNetwork.vp.resourceCapacity[sbsFoundVertex]
-                        sortedSbsValList = sorted(sortedSbsValList, reverse=True)
+                        sortedSbsValList = sorted(sortedSbsValList, reverse=greedy_method)
 
     return numOfMappings;
 
 
-def algorithmsTwo(totalNetwork,substrateNetwork, maxCncVnfList, maxCncSubList):
-        
-    sortedVnfCncList = sorted(maxCncVnfList, reverse=True)    #change the name of the RanCnclist         
-    sortedSbsCncList = sorted(maxCncSubList, reverse=True)    #chnage the name of the SbsCnclsit
-    isNeighborMapped = False
+def algorithmTwo(totalNetwork, vnfCncList):
+    # Sorting the list of maximal connections for the VNF Functions
+    sortedVnfCncList = sorted(vnfCncList, reverse=True)
     sbsFoundVertex = 0
+    vnfFoundVertex = 0
     numOfMappings = 0
-    ranFoundVertex = 0
+    isFirst = True
 
-    for vnfCncValue in sortedVnfCncList: # Checking for the max
+    #  Step One - First store the Maximally connected VNFs and their Neighbors in a list of sets
+
+    maximalConnectedVnfs = []
+    for resVal in sortedVnfCncList:
+
+        maxCncVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, resVal)
+
+        loopIter = len(maxCncVertex) - 1 
+        maxCncList = []
+
+        while loopIter >= 0:
+            if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertex[loopIter]] == 0:
+                maxCncVertex = maxCncVertex[loopIter]
+                break
+            else:
+                del maxCncVertex[loopIter]
+                loopIter -= 1
         
-        foundVnfvert = False
-        vnfFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.connection, vnfCncValue)
-            
-        for sbsCncValue in sortedSbsCncList: # Checking for the max 
-            foundSbsvert = False
-            sbsFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.connection, sbsCncValue)
-            
-        ctrVar = len(ranFoundVertex) - 1
+        if not maxCncVertex:
+            print("Exception has been thrown! The max connected vertex is not found due to probably being mapped")
+            continue
+        else:
+            maxCncList.append(maxCncVertex)
+            totalNetwork.vp.binaryMappingVar[maxCncVertex] = 3
+        
+        for maxCncVertexNeighbor in maxCncVertex.all_neighbors():
+            if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertexNeighbor] == 0:
+                maxCncList.add(maxCncVertexNeighbor)
+                totalNetwork.vp.binaryMappingVar[maxCncVertexNeighbor] = 3  
 
-        while ctrVar >= 0:
-            if totalNetwork.vertex_properties.binaryMappingVar[vnfFoundVertex[ctrVar]] == 0:
-                vnfFoundVertex = vnfFoundVertex[ctrVar]
-                foundSbsVert = True
-                break
-            else:
-                del vnfFoundVertex[ctrVar]
-                ctrVar -= 1
-                
-        ctrVar = len(vnfFoundVertex) - 1
+        maximalConnectedVnfs.append(maxCncList)
 
-        while ctrVar >= 0:
-            if totalNetwork.vertex_properties.binaryMappingVar[sbsFoundVertex[ctrVar]] == 0:
-                sbsFoundVertex = sbsFoundVertex[ctrVar]
-                foundSbsVert = True
-                break
-            else:
-                del sbsFoundVertex[ctrVar]
-                ctrVar -= 1
-                
-        if not vnfFoundVertex:
-            print("Empty List of Found VNF Functons")
-        if not sbsFoundVertex:
-            print("Empty List of Found Substrate Functons")
-            
-            #case One
+    # Step Two - Mapping the Neighborhoods
+    
+    for neighborhood in maximalConnectedVnfs:
 
-        if isNeighborMapped == False:
-            sbsFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.connection, sortedVnfCncList[0])
-            vnfFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.connection, sortedSbsCncList[0])
-                
-        if totalNetwork.vertex_properties.resourceCapacity[sbsFoundVertex[0]] >= vnfFoundVertex[0]: 
-            foundSbsVert = True
-        if foundSbsVert == False:
-                print("Failed VNF Mapping Case One")
-                totalNetwork.vp.binaryMappingVar[sbsFoundVertex[0]] = 2
-        else: # Mapping Case One 
-            totalNetwork.add_edge(sbsFoundVertex[0], vnfFoundVertex[0])
-            totalNetwork.vp.binaryMappingVar[vnfFoundVertex[0]] = 1
-            numOfMappings +=1
-            
-        #Case two        
-        if totalNetwork.vp.binaryMappingVar[vnfFoundVertex[0]]==1:
-            if totalNetwork.vertex_properties.resourceCapacity[sbsFoundVertex[0]] >= vnfFoundVertex[1]:
-                totalNetwork.add_edge(sbsFoundVertex[0], vnfFoundVertex[1])
-                totalNetwork.vp.binaryMappingVar[vnfFoundVertex[1]] = 1
-                numOfMappings +=1
-                
+        isFirst = True
+        isFailed = False
+
+        for vnf_vertex in neighborhood:
+
+            if isFirst:
+                # Make the first VNFs Mapping here and then map its neighbors in the consequent Substrate Tower
+                ranFoundVertex = vnf_vertex
+                sbsPositiveDifference = []
+                sbsNegativeDifference = []
+                ranFoundVertex = vnf_vertex
+                negativeSbsIndex = -1
+                positiveSbsIndex = -1
+                finalSbsIndex = -1
+
+                # Check if the first has a mapped neighbor 
+
+                isMainVnfMapped = False
+
+                for neighbors in ranFoundVertex.all_neighbors():
+                    if totalNetwork.vp.binaryMappingVar[neighbors] == 1:
+                        isMainVnfMapped = True
+                        break
+                    else:
+                        continue
+
+                # If the vnf does not have a mapped neighbor
+                if not isMainVnfMapped:
+                    # Try to find the Sbs Tower which would be most appropriate 
+                    sbsNetwork = find_vertex(totalNetwork, totalNetwork.gp.vertexName, "Substrate")
+
+                    # Looping to find the Sbs Neighborhood Differences
+
+                    for sbsTower in sbsNetwork:
+                        if (totalNetwork.vp.totalResoucesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) >= 0:
+                            sbsPositiveDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[firstMaxVnf])
+                            sbsNegativeDifference.append(-1000000)
+                        elif (totalNetwork.vp.totalResoucesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) <= 0:
+                            sbsNegativeDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[firstMaxVnf])
+                            sbsPositiveDifference.append(1000000)
+                    
+                    sbsPositiveDifference = np.asarray(sbsPositiveDifference)
+                    sbsNegativeDifference = np.asarray(sbsNegativeDifference)
+
+                    # Make Imporovements - Improve way of accomdating neighborhoods to Required Spots (Look at Notion Improvements Page)
+                    # Another Improvement - Add all the like differences to a list (Allowing to check for the most connected Sbs Tower and take that one instead.)
+                    if sbsPositiveDifference:
+                        positiveSbsIndex = sbsPositiveDifference.argmin()
+                        finalSbsIndex = negativeSbsIndex
+                    elif sbsNegativeDifference:
+                        negativeSbsIndex = sbsNegativeDifference.argmax()
+                        finalSbsIndex = negativeSbsIndex
+                    else:
+                        print("A Failure Has Occured")
+                        isFirst = False
+                        continue
+                    
+                    # We have found our Primary Sbs Neighborhood !!
+                    sbsFoundVertex = sbsTower[finalSbsIndex]
+
+                    # In this case we can simply map now without considering connections and bandwidth
+
+                    if totalNetwork.vp.resourceCapacity[sbsFoundVertex] >= totalNetwork.vp.resources[ranFoundVertex]:
+                        totalNetwork.add_edge(sbsFoundVertex, ranFoundVertex)
+                        totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 1
+                        numOfMappings += 1
+                        totalNetwork.vp.resourceCapacity[sbsFoundVertex] -= totalNetwork.vertex_properties.resources[ranFoundVertex]
+
+
+
+    
+                    
+# Defining Algorithm 3 (Basketized Algorithm)
+def algorithmThree(totalNetwork,resList,resCAPlist,greedy_method, totalResAccList):
+    # possibleSbsTower = find_vertex(totalNetwork, totalNetwork.vp.resourceCapacity, sbsResourceValue)
+    sortedAccList    = sorted(totalResAccList, reversed = True)
 

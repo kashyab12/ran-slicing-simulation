@@ -197,7 +197,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
     # Sorting the list of maximal connections for the VNF Functions
     sortedVnfCncList = sorted(vnfCncList, reverse=True)
     sbsFoundVertex = 0
-    vnfFoundVertex = 0
+    ranFoundVertex = 0
     numOfMappings = 0
     isFirst = True
 
@@ -238,16 +238,18 @@ def algorithmTwo(totalNetwork, vnfCncList):
     for neighborhood in maximalConnectedVnfs:
 
         isFirst = True
-        isFailed = False
+        isFirstFailed = False
 
         for vnf_vertex in neighborhood:
 
+            ranFoundVertex = vnf_vertex
+            mappableSbsTowers = []
+
             if isFirst:
                 # Make the first VNFs Mapping here and then map its neighbors in the consequent Substrate Tower
-                ranFoundVertex = vnf_vertex
+                
                 sbsPositiveDifference = []
                 sbsNegativeDifference = []
-                ranFoundVertex = vnf_vertex
                 negativeSbsIndex = -1
                 positiveSbsIndex = -1
                 finalSbsIndex = -1
@@ -268,14 +270,33 @@ def algorithmTwo(totalNetwork, vnfCncList):
                     # Try to find the Sbs Tower which would be most appropriate 
                     sbsNetwork = find_vertex(totalNetwork, totalNetwork.gp.vertexName, "Substrate")
 
+                    # Find the Towers which can provide it with resources as well as Highest Insurance for its Neighbors
+                    for sbsTower in sbsNetwork:
+                        if totalNetwork.vp.resourceCapacity[sbsTower] >= totalNetwork.vp.resources[ranFoundVertex]:
+                            mappableSbsTowers.append(sbsTower)
+                    
+                    # Even it has failed we still continue to try and find its best sbs tower
+                    if not mappableSbsTowers:
+                        print("The First Has Failed. ")
+                        isFirstFailed = True
+                        isFirst = True
+                        updateList = []
+                        updateList.append(ranFoundVertex)
+                        updateList.append(ranFoundVertex.all_neighbors())
+                        for updateVnfFunction in updateList:
+                            totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[updateVnfFunction]
+
+                        totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 2
+                        continue
+                        
                     # Looping to find the Sbs Neighborhood Differences
 
-                    for sbsTower in sbsNetwork:
+                    for sbsTower in mappableSbsTowers:
                         if (totalNetwork.vp.totalResoucesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) >= 0:
-                            sbsPositiveDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[firstMaxVnf])
+                            sbsPositiveDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                             sbsNegativeDifference.append(-1000000)
                         elif (totalNetwork.vp.totalResoucesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) <= 0:
-                            sbsNegativeDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[firstMaxVnf])
+                            sbsNegativeDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                             sbsPositiveDifference.append(1000000)
                     
                     sbsPositiveDifference = np.asarray(sbsPositiveDifference)
@@ -290,26 +311,121 @@ def algorithmTwo(totalNetwork, vnfCncList):
                         negativeSbsIndex = sbsNegativeDifference.argmax()
                         finalSbsIndex = negativeSbsIndex
                     else:
-                        print("A Failure Has Occured")
-                        isFirst = False
+                        print("A Failure Has Occured! Why would this happen?")
+                        isFirstFailed = True
+                        isFirst = True
                         continue
                     
                     # We have found our Primary Sbs Neighborhood !!
-                    sbsFoundVertex = sbsTower[finalSbsIndex]
+                    sbsFoundVertex = mappableSbsTowers[finalSbsIndex]
 
                     # In this case we can simply map now without considering connections and bandwidth
 
-                    if totalNetwork.vp.resourceCapacity[sbsFoundVertex] >= totalNetwork.vp.resources[ranFoundVertex]:
-                        totalNetwork.add_edge(sbsFoundVertex, ranFoundVertex)
-                        totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 1
-                        numOfMappings += 1
-                        totalNetwork.vp.resourceCapacity[sbsFoundVertex] -= totalNetwork.vertex_properties.resources[ranFoundVertex]
+                    totalNetwork.add_edge(sbsFoundVertex, ranFoundVertex)
+                    totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 1
+                    numOfMappings += 1
+                    totalNetwork.vp.resourceCapacity[sbsFoundVertex] -= totalNetwork.vp.resources[ranFoundVertex]
 
+                    # Must Update the Total Resources Acc For Sbs Tower and Its Neighbors
+                    updateSbsList = []
+                    updateSbsList.append(sbsFoundVertex)
+                    updateSbsList.append(sbsFoundVertex.all_neighbors())
 
+                    for updateFunction in updateSbsList:
+                        totalNetwork.vp.totalResourcesAcc[updateFunction] -= totalNetwork.vp.resources[ranFoundVertex]
 
+                    isFirst = False
+
+                else:
+                    # We Must Find the Best Candidate for the VNF Function Connected to an Already Mapped Neighbor
+                    # Firstly, let us try to find the list of Sbs Towers that Satisfy the connection component.
+
+                    # Mapped VNF Neighbors
+                    mappedVnfNeighbor = []
+
+                    for neighborVnfFunction in ranFoundVertex.all_neighbors():
+                        if totalNetwork.vp.binaryMappingVar[neighborVnfFunction] == 1:
+                            mappedVnfNeighbor.append(neighborVnfFunction)
+
+                    # List of Neighborhood Lists to find the intersections
+                    neighborhoodList = []
+
+                    for neighborVnfFunction in mappedVnfNeighbor:
+                        neighborhood = []
+                        neighborhood.append(totalNetwork.vertex_index[neighborVnfFunction])
+
+                        for neighbors in neighborVnfFunction:
+                            neighborhood.append(totalNetwork.vertex_index[neighbors])
+                        
+                        neighborhoodList.append(neighborhood)
+                        neighborhood.clear()
+                    
+                    # Now that we have the neighborhood list we can now find the interesection
+
+                    # Not using mappableSbsTowers since it is not a set
+                    possibleSbsTowers = set(neighborhoodList[0])
+
+                    for neighborhood in neighborhoodList[1:]:
+                        possibleSbsTowers.intersection_update(neighborhood)
+
+                    if not possibleSbsTowers:
+                        isFirstFailed = True
+                        isFirst = True
+                        updateList = []
+                        updateList.append(ranFoundVertex)
+                        updateList.append(ranFoundVertex.all_neighbors())
+
+                        for updateVnfFunction in updateList:
+                            totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[updateVnfFunction]
+
+                        totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 2
+                        continue
+                
+                    # Now out of this list we must check for resource possibility
+
+                    for vertexIndex in possibleSbsTowers:
+                        mappableSbsTowers.append(totalNetwork.vertex(vertexIndex))
+
+                    resRefinedMappable = []
+
+                    for sbsTower in mappableSbsTowers:
+                        if totalNetwork.vp.resourceCapacity[sbsTower] >= totalNetwork.vp.resourceCapacity[ranFoundVertex]:
+                            resRefinedMappable.append(sbsTower)
+                    
+                    mappableSbsTowers = resRefinedMappable
+                    
+                    # Checking again for Failure
+
+                    if not mappableSbsTowers:
+                        print("Failure has Occured On the First Round.")
+                        isFirstFailed = True
+                        isFirst = True
+                        updateList = []
+                        updateList.append(ranFoundVertex)
+                        updateList.append(ranFoundVertex.all_neighbors())
+
+                        for updateVnfFunction in updateList:
+                            totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[updateVnfFunction]
+
+                        totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 2
+                        continue
+
+                    # Checking for Bandwidth of the connections
+
+                    # First we must find all the sbs towers our vnf neighbors are mapped to ( Approach Similar to Algo One )
+                    
+                    vnfNeighborMappedSbs = []
+
+                    for neighbor in mappedVnfNeighbor:
+
+                    # After doing so we will check which of the compatible Sbs Towers has the closest Total Resource Acc compared to the Neighborhood being dealt with.
+            
+            
+            else: # Dealing with the Child Neighbors
+                # Very Similar Approach to the Above Else Clause
     
                     
-# Defining Algorithm 3 (Basketized Algorithm)
+# Defining Algorithm 3 (Baskin Robbins Algorithm)
 def algorithmThree(totalNetwork,resList,resCAPlist,greedy_method, totalResAccList):
     # possibleSbsTower = find_vertex(totalNetwork, totalNetwork.vp.resourceCapacity, sbsResourceValue)
     sortedAccList    = sorted(totalResAccList, reversed = True)

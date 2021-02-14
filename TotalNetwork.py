@@ -76,4 +76,4 @@ graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resou
 
 # Outputting the values for the Algorithm
 print("Algo One Mapping considering max. resources" + str(maxGreedyMapping))
-print("Algo One Mapping considering min. resources" + str(minGreedyMapping))
+print("Algo One Mapping considering min. resources" + str(minGreedyMapping))S

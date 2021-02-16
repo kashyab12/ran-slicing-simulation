@@ -6,8 +6,8 @@ def setSbsNetworkProperties(substrateNetwork):
     # Creating Properties for the Substrate Network
     # ---------------------------------------------
 
-    graphProp = substrateNetwork.new_graph_property("string")
-    substrateNetwork.gp.graphName = graphProp
+    graphProp = substrateNetwork.new_vertex_property("string")
+    substrateNetwork.vp.graphName = graphProp
 
     # Giving the Substrate Vertices a Resource Capacity Property
     resourceCapacityProp = substrateNetwork.new_vertex_property("int")
@@ -38,11 +38,11 @@ def setSbsTowerProperties(substrateNetwork, resCapList):
     loopIter = 0
 
     # Setting up Graph Property
-    substrateNetwork.gp.graphName = "Substrate"
 
     # Setting up Vertex Properties
 
     for sbsTower in substrateNetwork.vertices():
+        substrateNetwork.vp.graphName[sbsTower] = "Substrate"
         substrateNetwork.vp.resourceCapacity[sbsTower] = resCapList[loopIter]
         substrateNetwork.vp.resources[sbsTower] = -1
         substrateNetwork.vp.binaryMappingVar[sbsTower] = -1

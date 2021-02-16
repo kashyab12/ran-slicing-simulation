@@ -11,8 +11,8 @@ def setRANSliceProperties(ranSlices):
     # Creating Properties for the RAN Slices
     # --------------------------------------
 
-    graphProp = ranSlices[0].new_graph_property("string")
-    ranSlices[0].gp.graphName = graphProp
+    graphProp = ranSlices[0].new_vertex_property("string")
+    ranSlices[0].vp.graphName = graphProp
 
     # Giving the VNF Functions a Resource Capacity Property
     resourceCapacityProp = ranSlices[0].new_vertex_property("int")
@@ -43,10 +43,11 @@ def setVNFFunctionProperties(ranSlices, resList):
     loopIter = 0
 
     # Setting up the Graph Properties
-    ranSlices[0].gp.graphName = "RAN1"
+    
     
     # Setting up the Vertex Properties
     for vnfFunction in ranSlices[0].vertices():
+        ranSlices[0].vp.graphName[vnfFunction] = "RAN1"
         ranSlices[0].vertex_properties.resourceCapacity[vnfFunction] = -1   
         ranSlices[0].vertex_properties.resources[vnfFunction] = resList[loopIter]
         ranSlices[0].vertex_properties.binaryMappingVar[vnfFunction] = 0

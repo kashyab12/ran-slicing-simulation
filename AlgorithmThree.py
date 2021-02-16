@@ -15,7 +15,7 @@ def algorithmThree(totalNetwork, vnfTotalAccList):
     maximalConnectedVnfs = []
 
     for resVal in sortedVnfTotalAccList:
-        maxCncVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, resVal)
+        maxCncVertex = find_vertex(totalNetwork, totalNetwork.vp.totalResourcesAcc, resVal)
         loopIter = len(maxCncVertex) - 1
         maxCncList = []
 

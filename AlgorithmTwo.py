@@ -2,8 +2,6 @@ from graph_tool.all import *
 import numpy as np
 import random
 
-
-
 def algorithmTwo(totalNetwork, vnfCncList):
     
     # Sorting the list of maximal connections for the VNF Functions

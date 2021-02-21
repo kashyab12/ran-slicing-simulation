@@ -3,13 +3,18 @@ import TestingSbsConnection as testSbsCon
 import TestingVNF as testVnf
 import TestingVnfConnection as testVnfCon
 import matplotlib.pyplot as plt
+import numpy as np
+import TotalNetwork as tn
 
-def outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation):
+def outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, lowerBound, upperBound, intervalFactor):
     fig, ax = plt.subplots()
-    ax.plot(resultOne[0], resultOne[1], label="Algo One", linestyle='-')
-    ax.plot(resultTwo[0], resultTwo[1], label="Algo Two", linestyle='--')
-    ax.plot(resultThree[0], resultThree[1], label="Algo Three", linestyle=':')
-    ax.plot(resultFour[0], resultFour[1], label="Algo Four", linestyle='-.')
+    ax.plot(resultOne[0], resultOne[1], label="Algo One", linestyle='-', linewidth=2.0, marker='^', color='r')
+    ax.plot(resultTwo[0], resultTwo[1], label="Algo Two", linestyle='--', linewidth=2.0, marker='s', color='b')
+    ax.plot(resultThree[0], resultThree[1], label="Algo Three", linestyle=':' ,linewidth=4.0, marker='p', color='m')
+    ax.plot(resultFour[0], resultFour[1], label="Algo Four", linestyle='-.', linewidth=4.0, marker='*', color='g')
+
+    majorTick = np.arange(lowerBound, upperBound, intervalFactor )
+    ax.set_xticks(majorTick)
 
     ax.set(xlabel=xLabel, ylabel=yLabel,
     title=outputTitle)
@@ -36,7 +41,7 @@ def generateSbsTestResults():
 
     # Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numSubsNodes, tn.numSubsNodes + testSbs.intervalFactor*5 + 1, testSbs.intervalFactor)
 
     # Now test against Unsucessfull Mappings
 
@@ -49,7 +54,7 @@ def generateSbsTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numSubsNodes, tn.numSubsNodes + testSbs.intervalFactor*5 + 1, testSbs.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -62,7 +67,7 @@ def generateSbsTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numSubsNodes, tn.numSubsNodes + testSbs.intervalFactor*5 + 1, testSbs.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -76,7 +81,7 @@ def generateSbsTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numSubsNodes, tn.numSubsNodes + testSbs.intervalFactor*5 + 1, testSbs.intervalFactor)
 
 def generateSbsConTestResults():
 
@@ -95,7 +100,7 @@ def generateSbsConTestResults():
 
     # Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testSbsCon.intervalFactor)
 
     # Now test against Unsucessfull Mappings
 
@@ -108,7 +113,7 @@ def generateSbsConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testSbsCon.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -121,7 +126,7 @@ def generateSbsConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testSbsCon.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -134,7 +139,7 @@ def generateSbsConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testSbsCon.intervalFactor)
 
 def generateVnfTestResults():
 
@@ -153,7 +158,7 @@ def generateVnfTestResults():
 
     # Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numVnfFunctions, tn.numVnfFunctions + testVnf.intervalFactor*5 + 1, testVnf.intervalFactor )
 
     # Now test against Unsucessfull Mappings
 
@@ -166,7 +171,7 @@ def generateVnfTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numVnfFunctions, tn.numVnfFunctions + testVnf.intervalFactor*5 + 1, testVnf.intervalFactor )
 
     # Test Against Avail Resources
 
@@ -179,7 +184,7 @@ def generateVnfTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numVnfFunctions, tn.numVnfFunctions + testVnf.intervalFactor*5 + 1, testVnf.intervalFactor )
 
     # Test Against Avail Resources
 
@@ -192,7 +197,7 @@ def generateVnfTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, tn.numVnfFunctions, tn.numVnfFunctions + testVnf.intervalFactor*5 + 1, testVnf.intervalFactor )
 
 def generateVnfConTestResults():
 
@@ -210,7 +215,7 @@ def generateVnfConTestResults():
 
     # Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testVnfCon.intervalFactor)
 
     # Now test against Unsucessfull Mappings
 
@@ -223,7 +228,7 @@ def generateVnfConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testVnfCon.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -236,7 +241,7 @@ def generateVnfConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testVnfCon.intervalFactor)
 
     # Test Against Avail Resources
 
@@ -249,7 +254,7 @@ def generateVnfConTestResults():
 
     #  Now that we have all the results with the subsequent arrays
 
-    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation)
+    outputFigure(resultOne, resultTwo, resultThree, resultFour, xLabel, yLabel, outputTitle, savedLocation, 8, 2, testVnfCon.intervalFactor)
 
 
 

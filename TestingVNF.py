@@ -6,18 +6,21 @@ import random
 import TotalNetwork as tn
 import matplotlib.pyplot as plt
 
+intervalFactor = 2
+
 # (1) No. of vnf vs No. of succesfull mappings
 
 def testSuccMappings(algoType):
 
-    noVnf = tn.numVnfFunctions
+    noRanSlices = tn.numRnSlices
 
     xOne = []
     yOne = []
 
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+
     for ctrVar in range(5):
 
-        substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
         ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
         
@@ -35,14 +38,13 @@ def testSuccMappings(algoType):
         yOne.append(numMappings)
 
         substrateNetwork.clear()
-        ranSlices[0].clear()
+        ranSlices.clear()
         totalNetwork.clear()
-        tn.resCapList.clear()
         tn.resList.clear()
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noVnf += 150
+        noVnf += intervalFactor
 
     returnData = [xOne, yOne]
 
@@ -58,9 +60,10 @@ def testUnsuccMappings(algoType):
     xOne = []
     yOne = []
 
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+
     for ctrVar in range(5):
         
-        substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
         ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
@@ -77,14 +80,13 @@ def testUnsuccMappings(algoType):
         yOne.append(noVnf - numMappings)
 
         substrateNetwork.clear()
-        ranSlices[0].clear()
+        ranSlices.clear()
         totalNetwork.clear()
-        tn.resCapList.clear()
         tn.resList.clear()
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noVnf += 150
+        noVnf += intervalFactor
 
     returnData = [xOne, yOne]
 
@@ -99,10 +101,10 @@ def testAvailRes(algoType):
 
     xOne = []
     yOne = []
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
 
     for ctrVar in range(5):
         
-        substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
         ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
@@ -120,14 +122,13 @@ def testAvailRes(algoType):
         yOne.append(resAvail)
 
         substrateNetwork.clear()
-        ranSlices[0].clear()
+        ranSlices.clear()
         totalNetwork.clear()
-        tn.resCapList.clear()
         tn.resList.clear()
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noVnf += 150
+        noVnf += intervalFactor
 
     returnData = [xOne, yOne]
 
@@ -142,11 +143,11 @@ def testExhaustRes(algoType):
     xOne = []
     yOne = []
 
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+
     for ctrVar in range(5):
         
         # One
-        
-        substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
         ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
@@ -165,14 +166,13 @@ def testExhaustRes(algoType):
         yOne.append(tn.numSubsNodes*tn.resCtPerSbs - resAvail)
 
         substrateNetwork.clear()
-        ranSlices[0].clear()
+        ranSlices.clear()
         totalNetwork.clear()
-        tn.resCapList.clear()
         tn.resList.clear()
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noVnf += 150
+        noVnf += intervalFactor
 
     returnData = [xOne, yOne]
 

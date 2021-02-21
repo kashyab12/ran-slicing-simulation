@@ -14,9 +14,9 @@ resCtPerSbs = 4
 substrateNetwork = 0
 
 # RAN Global Variables
-ranSlices = []
+ranSlices = 0
 resList = []
-numRnSlices = 1 
+numRnSlices = 1
 numVnfFunctions = 200
 resCtPerVnf = 2
 vnfCncList = []
@@ -55,18 +55,26 @@ def createRANSlice(numRnSlices, numVnfFunctions, resList, resCtPerVnf, connectiv
     # for loopIter in range(numRnSlices):
     # ranSlices.append(random_graph(numVnfFunctions, randomDegreeVnf, directed=False, parallel_edges=False, self_loops=False, random=True))
 
-    ranSlices = []
+    ranSlices = Graph(directed=False)
+    networkSlices = []
 
     for loopIter in range(numRnSlices):
-        ranSlices.append(circular_graph(numVnfFunctions, k= connectivity, self_loops=False, directed=False))
 
-    for idx in range(numVnfFunctions):
-        resList.append(random.randint(resCtPerVnf, resCtPerVnf+2))
+        ranSlice = circular_graph(numVnfFunctions, k= connectivity, self_loops=False, directed=False)
 
-    ran.setRANSliceProperties(ranSlices)
-    ran.setVNFFunctionProperties(ranSlices, resList)
+        for idx in range(numVnfFunctions):
+            resList.append(random.randint(resCtPerVnf, resCtPerVnf+2))
 
-    graph_draw(ranSlices[0], output="ran.png")
+        ran.setRANSliceProperties(ranSlice)
+        ran.setVNFFunctionProperties(ranSlice, resList, loopIter)
+        networkSlices.append(ranSlice)
+
+    for slices in networkSlices:
+        graph_union(ranSlices, slices, include = True, internal_props=True)
+
+    numVnfFunctions *= numRnSlices
+
+    graph_draw(ranSlices, output="ran.png")
     
     return ranSlices;
 
@@ -74,12 +82,12 @@ def createTotalNetwork(substrateNetwork, ranSlices, vnfCncList, vnfTotalAccList)
     # Creating the Total Network
     totalNetwork = Graph(directed=False)
     totalNetwork = graph_union(totalNetwork, substrateNetwork, include = True, internal_props=True)
-    totalNetwork = graph_union(totalNetwork, ranSlices[0], include = True, internal_props=True)
+    totalNetwork = graph_union(totalNetwork, ranSlices, include = True, internal_props=True)
     # Testing the Created Network
     graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resources"), output="test_total_one.png", output_size= (1920, 1080))
 
     # Populating VNF Cnc List
-    ranSlice = find_vertex(totalNetwork, totalNetwork.vp.graphName, "RAN1")
+    ranSlice = find_vertex(totalNetwork, totalNetwork.vp.binaryMappingVar, 0)
 
     for vnfFunction in ranSlice:
         vnfCncList.append(totalNetwork.vp.degree[vnfFunction])
@@ -100,7 +108,7 @@ def resetNetwork(totalNetwork, substrateNetwork, ranSlices):
     # Resetting the connections
     totalNetwork = Graph(directed=False)
     totalNetwork = graph_union(totalNetwork, substrateNetwork, include = True, internal_props=True)
-    totalNetwork = graph_union(totalNetwork, ranSlices[0], include = True, internal_props=True)
+    totalNetwork = graph_union(totalNetwork, ranSlices, include = True, internal_props=True)
 
 def algoOneTest(totalNetwork, substrateNetwork, ranSlices, resList, resCapList):
     

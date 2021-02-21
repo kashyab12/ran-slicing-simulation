@@ -11,34 +11,34 @@ def setRANSliceProperties(ranSlices):
     # Creating Properties for the RAN Slices
     # --------------------------------------
 
-    graphProp = ranSlices[0].new_vertex_property("string")
-    ranSlices[0].vp.graphName = graphProp
+    graphProp = ranSlices.new_vertex_property("string")
+    ranSlices.vp.graphName = graphProp
 
     # Giving the VNF Functions a Resource Capacity Property
-    resourceCapacityProp = ranSlices[0].new_vertex_property("int")
-    ranSlices[0].vertex_properties.resourceCapacity = resourceCapacityProp
+    resourceCapacityProp = ranSlices.new_vertex_property("int")
+    ranSlices.vertex_properties.resourceCapacity = resourceCapacityProp
 
     # Giving the VNF Functions a Resource Property
-    resourceProp = ranSlices[0].new_vertex_property("int")
-    ranSlices[0].vertex_properties.resources = resourceProp
+    resourceProp = ranSlices.new_vertex_property("int")
+    ranSlices.vertex_properties.resources = resourceProp
 
     # Giving the VNF Functions a Bandwidth Property
-    capacityProp = ranSlices[0].new_edge_property("int")
-    ranSlices[0].edge_properties.bandwidth = capacityProp
+    capacityProp = ranSlices.new_edge_property("int")
+    ranSlices.edge_properties.bandwidth = capacityProp
 
     # Giving the Substrate Vertices a Resource Capacity Property
-    binaryMappingVar = ranSlices[0].new_vertex_property("int")
-    ranSlices[0].vertex_properties.binaryMappingVar = binaryMappingVar
+    binaryMappingVar = ranSlices.new_vertex_property("int")
+    ranSlices.vertex_properties.binaryMappingVar = binaryMappingVar
 
-    totalResource = ranSlices[0].new_vertex_property("int")
-    ranSlices[0].vertex_properties.totalResourcesAcc = totalResource
+    totalResource = ranSlices.new_vertex_property("int")
+    ranSlices.vertex_properties.totalResourcesAcc = totalResource
 
-    vertexDegree = ranSlices[0].new_vertex_property("int")
-    ranSlices[0].vertex_properties.degree = vertexDegree
+    vertexDegree = ranSlices.new_vertex_property("int")
+    ranSlices.vertex_properties.degree = vertexDegree
 
 
 # Function to Set the Properties for the VNF Functions
-def setVNFFunctionProperties(ranSlices, resList):
+def setVNFFunctionProperties(ranSlices, resList, sliceNumber):
 
     loopIter = 0
 
@@ -46,23 +46,23 @@ def setVNFFunctionProperties(ranSlices, resList):
     
     
     # Setting up the Vertex Properties
-    for vnfFunction in ranSlices[0].vertices():
-        ranSlices[0].vp.graphName[vnfFunction] = "RAN1"
-        ranSlices[0].vertex_properties.resourceCapacity[vnfFunction] = -1   
-        ranSlices[0].vertex_properties.resources[vnfFunction] = resList[loopIter]
-        ranSlices[0].vertex_properties.binaryMappingVar[vnfFunction] = 0
-        ranSlices[0].vertex_properties.degree[vnfFunction] = len(ranSlices[0].get_all_neighbors(vnfFunction))
+    for vnfFunction in ranSlices.vertices():
+        ranSlices.vp.graphName[vnfFunction] = "RAN" + str(sliceNumber)
+        ranSlices.vertex_properties.resourceCapacity[vnfFunction] = -1   
+        ranSlices.vertex_properties.resources[vnfFunction] = resList[loopIter]
+        ranSlices.vertex_properties.binaryMappingVar[vnfFunction] = 0
+        ranSlices.vertex_properties.degree[vnfFunction] = len(ranSlices.get_all_neighbors(vnfFunction))
         loopIter += 1
     
     # Setting up the totalResources per vertex
-    for vnfFunction in ranSlices[0].vertices():
-        resAcc = ranSlices[0].vp.resourceCapacity[vnfFunction]
-        
+    for vnfFunction in ranSlices.vertices():
+        resAcc = ranSlices.vp.resourceCapacity[vnfFunction]
+            
         for vnfFunctionNeighbor in vnfFunction.all_neighbors():
-            resAcc += ranSlices[0].vp.resourceCapacity[vnfFunctionNeighbor]
-        
-        ranSlices[0].vp.totalResourcesAcc[vnfFunction] = resAcc
+            resAcc += ranSlices.vp.resourceCapacity[vnfFunctionNeighbor]
+            
+        ranSlices.vp.totalResourcesAcc[vnfFunction] = resAcc
     
     # Setting uy the Edge Properties
-    for vnfEdge in ranSlices[0].edges():
-        ranSlices[0].edge_properties.bandwidth[vnfEdge] = 3
+    for vnfEdge in ranSlices.edges():
+        ranSlices.edge_properties.bandwidth[vnfEdge] = 3

@@ -7,6 +7,8 @@ import random
 import matplotlib.pyplot as plt
 import TotalNetwork as tn
 
+intervalFactor = 20
+
 # (1) no. of sbs vs no. of successfull mappings
 
 def testSuccMappings(algoType):
@@ -41,7 +43,7 @@ def testSuccMappings(algoType):
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noSbs += 15
+        noSbs += intervalFactor
 
     returnData = [xOne, yOne]
 
@@ -83,7 +85,7 @@ def testUnsuccMappings(algoType):
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noSbs += 15
+        noSbs += intervalFactor
         
     returnData = [xOne, yOne]
 
@@ -127,7 +129,7 @@ def testAvailRes(algoType):
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noSbs += 15
+        noSbs += intervalFactor
 
     returnData = [xOne, yOne]
 
@@ -171,7 +173,7 @@ def testExhaustRes(algoType):
         tn.vnfCncList.clear()
         tn.vnfTotalAccList.clear()
         
-        noSbs += 15
+        noSbs += intervalFactor
 
     returnData = [xOne, yOne]
 

@@ -3,8 +3,34 @@ import RAN_Slice as ran
 import AlgorithmOne as algoOne
 import AlgorithmTwo as algoTwo
 import AlgorithmThree as algoThree
+import AlgorithmFour as algoFour
 from graph_tool.all import *
 import random
+
+# Substrate Global Variables
+numSubsNodes = 100
+resCapList = []
+resCtPerSbs = 4
+substrateNetwork = 0
+
+# RAN Global Variables
+ranSlices = []
+resList = []
+numRnSlices = 1 
+numVnfFunctions = 200
+resCtPerVnf = 2
+vnfCncList = []
+vnfTotalAccList = []
+
+# Other Global
+totalNetwork = 0
+
+
+# def randomDegreeSbs():
+#     return random.randint(1, numSubsNodes - 1)
+
+# def randomDegreeVnf():
+#     return random.randint(1, numVnfFunctions - 1)
 
 # Setting up the Substrate Network
 
@@ -82,8 +108,6 @@ def algoOneTest(totalNetwork, substrateNetwork, ranSlices, resList, resCapList):
     maxGreedyMapping = algoOne.algorithmOne(totalNetwork, resList, resCapList, True)
     graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resourceCapacity"), output="algo_one_sbs.png", inline_scale=10)
     graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resources"), output="algo_one_vnf.png", inline_scale=10)
-
-    resetNetwork(totalNetwork, substrateNetwork, ranSlices)
     
     # Outputting the values for the Algorithm
     print("Algo One Mapping considering max. resources: " + str(maxGreedyMapping))
@@ -111,6 +135,18 @@ def algoThreeTest(totalNetwork, vnfTotalAccList):
     print("Algo Three Mapping - " + str(neighborhoodMappingTwo))
     
     return neighborhoodMappingTwo;
+
+def algoFourTest(totalNetwork, substrateNetwork, ranSlices, resCapList, vnfCncList):
+    
+    # Testing Algorithm One 
+    maxGreedyMapping = algoFour.algorithmFour(totalNetwork, resCapList, vnfCncList, True)
+    graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resourceCapacity"), output="algo_one_sbs.png", inline_scale=10)
+    graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resources"), output="algo_one_vnf.png", inline_scale=10)
+    
+    # Outputting the values for the Algorithm
+    print("Algo Four Mapping considering max. connections: " + str(maxGreedyMapping))
+
+    return maxGreedyMapping;
 
 
 def findTotalSbsMapped(totalNetwork):

@@ -2,28 +2,31 @@ from graph_tool.all import *
 import numpy as np
 import random
 
-def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
+def algorithmFour(totalNetwork, resCapList, vnfCncList, greedy_method):
     
-    sortedResValList = sorted(resList, reverse=greedy_method)
+    sortedVnfCncList = sorted(vnfCncList, reverse=greedy_method)
     sortedSbsValList = sorted(resCapList, reverse=greedy_method)
+
     sbsFoundVertex = 0
     numOfMappings = 0
     ranFoundVertex = 0
 
-    for vnfResourceValue in sortedResValList:
+    for vnfCncVal in sortedVnfCncList:
+
+        print("Num of Mapping Al")
 
         foundSbsVert = False
-        ranFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.resources, vnfResourceValue)
+        ranFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, vnfCncVal)
+        optimalRan = []
+        maxVnfRes = 0
 
-        ctrVar = len(ranFoundVertex) - 1
-
-        while ctrVar >= 0:
-            if totalNetwork.vertex_properties.binaryMappingVar[ranFoundVertex[ctrVar]] == 0:
-                ranFoundVertex = ranFoundVertex[ctrVar]
-                break
-            else:
-                del ranFoundVertex[ctrVar]
-                ctrVar -= 1
+        for vnfFunction in ranFoundVertex:
+            if totalNetwork.vertex_properties.binaryMappingVar[vnfFunction] == 0:
+                optimalRan.append(vnfFunction)
+        
+        for vnfFunction in optimalRan:
+            if totalNetwork.vp.resources[vnfFunction] > maxVnfRes:
+                ranFoundVertex = vnfFunction
 
         if not ranFoundVertex:
             print("Empty List of Found VNF Functions")
@@ -40,14 +43,13 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
             
             # Case One
             if isNeighborMapped == False:
-
                 if sortedSbsValList[0] >= totalNetwork.vp.resourceCapacity[ranFoundVertex]:
                     sbsFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.resourceCapacity, sortedSbsValList[0])
                     foundSbsVert = True
                 else:
                     foundSbsVert = False
-            
-                if foundSbsVert == False:
+                
+                if foundSbsVert == False or not sbsFoundVertex:
                     print("Failed VNF Mapping Case One")
                     totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 2
                     continue
@@ -98,10 +100,10 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
                             break
                     
                     if not possibleSbsTower:
-                        print("List of Possible is Empty")
+                        # print("List of Possible is Empty")
                         continue
 
-                    if totalNetwork.vp.resourceCapacity[possibleSbsTower[0]] >= vnfResourceValue:
+                    if totalNetwork.vp.resourceCapacity[possibleSbsTower[0]] >= totalNetwork.vp.resources[ranFoundVertex]:
                         for mappedSbsTower in vnfSbsMappedNeighbor:
                             if possibleSbsTower[0] not in mappedSbsTower.all_neighbors():   
                                 if possibleSbsTower[0] == mappedSbsTower:
@@ -181,10 +183,12 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
 
                         # Search for the appropraite Index
 
-                        for iterCount in range(len(mappableSbsTowers)):
-                            if mappableSbsTowers[iterCount] == sbsFoundVertex:
-                                sortCount = selectedSbsTower[iterCount]
-                                break
+                        sbsNetwork = find_vertex(totalNetwork, totalNetwork.vp.graphName, "Substrate")
+
+                        for ctrVar in range(len(sortedSbsValList)):
+                            for sbsTower in sbsNetwork:
+                                if totalNetwork.vp.resourceCapacity[sbsTower] == sortedSbsValList[ctrVar]:
+                                    sortCount = ctrVar
 
                         sortedSbsValList[sortCount] = totalNetwork.vp.resourceCapacity[sbsFoundVertex]
                         sortedSbsValList = sorted(sortedSbsValList, reverse=greedy_method)

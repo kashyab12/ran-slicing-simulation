@@ -1,3 +1,8 @@
 # RAN-Slicing-Simulation
-## What is RAN Slicing?
-- Serves as a fundamental element for end-to-end network slicing, which must work across the core, RAN, edge and transport networks to provide a dedicated slice that can be offered to service providers or enterprise customers.
+## Problem Overview
+
+With ever more devices connected to the Internet and the creation of new services, such as mobile broadband, video streaming, the massive Internet of Things, and autonomous vehicle management, demands for diverse vertical industry applications are growing rapidly to expand the wireless market.  
+
+To address the various application demands, Radio Access Network (RAN) slicing has become one of the most promising architectural technologies for the forthcoming 5G era RAN slicing completely overturns the traditional model of single ownership of all network resources and brings a new vision where the physical infrastructure resources are shared across many RAN slices. Each slice built on top of the underlying physical RAN (substrate) is a separate logical mobile network, which delivers a set of services with similar characteristics and is isolated from others.  
+
+Leveraged by network function virtualization (NFV), a RAN slice is constituted by various virtual network functions (VNFs) and virtual links that are embedded as instances on substrate nodes Unfortunately, failures may occasionally arise from substrate nodes due to reasons such as software fault occurrences, servers being powered down for maintenance, or the misconfiguration of servers. This leads to the malfunction and invalidation of the RAN slices that have VNFs embedded at the failed substrate nodes. To recover RAN slice functions, a RAN slicing configuration scheme to relieve VNFs from the substrate network failures (remapping/re-embedding VNFs onto live substrate nodes) is equally imperative thereafter referred to as RAN slicing-configuration or mapping plan, which consists of an ordered set of mappings of VNFs.

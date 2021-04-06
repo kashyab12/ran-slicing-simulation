@@ -17,7 +17,7 @@ def testSuccMappings(algoType, connectivityVnf):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
 
     for ctrVar in range(5):
         
@@ -38,7 +38,6 @@ def testSuccMappings(algoType, connectivityVnf):
         xOne.append(connectivity)
         yOne.append(numMappings)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -59,7 +58,7 @@ def testUnsuccMappings(algoType, connectivityVnf):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
 
     for ctrVar in range(5):
         
@@ -80,7 +79,6 @@ def testUnsuccMappings(algoType, connectivityVnf):
         xOne.append(connectivity)
         yOne.append(tn.numVnfFunctions - numMappings)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -89,8 +87,8 @@ def testUnsuccMappings(algoType, connectivityVnf):
         
         connectivity+= intervalFactor
         
-        returnData = [xOne, yOne]
-        return returnData;
+    returnData = [xOne, yOne]
+    return returnData;
 
 
 # (3) No. of Connections Sbs vs Amount of Sbs. Resouces Unused.
@@ -102,7 +100,7 @@ def testAvailRes(algoType, connectivityVnf):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
 
     for ctrVar in range(5):
         
@@ -124,7 +122,6 @@ def testAvailRes(algoType, connectivityVnf):
         xOne.append(connectivity)
         yOne.append(avRes)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -146,13 +143,13 @@ def testExhaustRes(algoType, connectivityVnf):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, connectivity)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
 
     for ctrVar in range(5):
         
         # One
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
         if algoType == 1:
@@ -168,7 +165,6 @@ def testExhaustRes(algoType, connectivityVnf):
         xOne.append(connectivity)
         yOne.append(tn.numSubsNodes*tn.resCtPerSbs - avRes)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()

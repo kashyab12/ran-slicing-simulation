@@ -7,20 +7,20 @@ import random
 import matplotlib.pyplot as plt
 import TotalNetwork as tn
 
-intervalFactor = 20
-
 # (1) no. of sbs vs no. of successfull mappings
 
-def testSuccMappings(algoType):
+def testSuccMappings(algoType, intervalFactor = 5, iterations = 20, numSubsNode = 10, numRnSlices = 1, numVnf = 20):
 
-    noSbs = tn.numSubsNodes
+    noSbs = numSubsNode
+    
+
 
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 3)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
 
         substrateNetwork = tn.createSbsNetwork(noSbs, tn.resCapList, tn.resCtPerSbs, 2)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
@@ -51,16 +51,16 @@ def testSuccMappings(algoType):
 
 # (2) no. of sbs vs no. of unsuccesfull mappings
 
-def testUnsuccMappings(algoType):
+def testUnsuccMappings(algoType, intervalFactor = 5, iterations = 20):
 
     noSbs = tn.numSubsNodes
 
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 3)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
@@ -93,16 +93,16 @@ def testUnsuccMappings(algoType):
 
 # (3) No. of sbs tow vs No. of Sbs Resources Unused
 
-def testAvailRes(algoType):
+def testAvailRes(algoType, intervalFactor = 5, iterations = 20):
 
     noSbs = tn.numSubsNodes
 
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 3)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
@@ -137,16 +137,16 @@ def testAvailRes(algoType):
 
 # (4) No. of sbs tow vs No. of used Sbs
 
-def testExhaustRes(algoType):
+def testExhaustRes(algoType, intervalFactor = 5, iterations = 20):
 
     noSbs = tn.numSubsNodes
 
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 3)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         

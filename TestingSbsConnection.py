@@ -19,7 +19,7 @@ def testSuccMappings(algoType, connectivitySbs):
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 3)
 
     for ctrVar in range(5):
         
@@ -41,7 +41,6 @@ def testSuccMappings(algoType, connectivitySbs):
         yOne.append(numMappings)
 
         substrateNetwork.clear()
-        ranSlices.clear()
         totalNetwork.clear()
         tn.resCapList.clear()
         tn.vnfCncList.clear()
@@ -62,7 +61,7 @@ def testUnsuccMappings(algoType, connectivitySbs):
     xOne = []
     yOne = []
     
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 4)
 
     for ctrVar in range(5):
         
@@ -84,7 +83,6 @@ def testUnsuccMappings(algoType, connectivitySbs):
         yOne.append(tn.numVnfFunctions - numMappings)
 
         substrateNetwork.clear()
-        ranSlices.clear()
         totalNetwork.clear()
         tn.resCapList.clear()
         tn.vnfCncList.clear()
@@ -104,7 +102,7 @@ def testAvailRes(algoType, connectivitySbs):
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 4)
 
     for ctrVar in range(5):
         
@@ -127,7 +125,6 @@ def testAvailRes(algoType, connectivitySbs):
         yOne.append(avRes)
 
         substrateNetwork.clear()
-        ranSlices.clear()
         totalNetwork.clear()
         tn.resCapList.clear()
         tn.vnfCncList.clear()
@@ -148,7 +145,7 @@ def testExhaustRes(algoType, connectivitySbs):
     xOne = []
     yOne = []
 
-    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 2)
+    ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, 4)
 
     for ctrVar in range(5):
         
@@ -171,7 +168,6 @@ def testExhaustRes(algoType, connectivitySbs):
         yOne.append(tn.numSubsNodes*tn.resCtPerSbs - avRes)
 
         substrateNetwork.clear()
-        ranSlices.clear()
         totalNetwork.clear()
         tn.resCapList.clear()
         tn.vnfCncList.clear()

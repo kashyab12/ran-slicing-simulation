@@ -47,7 +47,7 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
                 else:
                     foundSbsVert = False
             
-                if foundSbsVert == False:
+                if foundSbsVert == False or not sbsFoundVertex:
                     print("Failed VNF Mapping Case One")
                     totalNetwork.vp.binaryMappingVar[ranFoundVertex] = 2
                     continue

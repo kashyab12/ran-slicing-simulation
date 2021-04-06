@@ -38,12 +38,9 @@ def setRANSliceProperties(ranSlices):
 
 
 # Function to Set the Properties for the VNF Functions
-def setVNFFunctionProperties(ranSlices, resList, sliceNumber):
+def setVNFFunctionProperties(ranSlices, resList, sliceNumber = 1):
 
     loopIter = 0
-
-    # Setting up the Graph Properties
-    
     
     # Setting up the Vertex Properties
     for vnfFunction in ranSlices.vertices():
@@ -56,13 +53,13 @@ def setVNFFunctionProperties(ranSlices, resList, sliceNumber):
     
     # Setting up the totalResources per vertex
     for vnfFunction in ranSlices.vertices():
-        resAcc = ranSlices.vp.resourceCapacity[vnfFunction]
+        resAcc = ranSlices.vp.resources[vnfFunction]
             
         for vnfFunctionNeighbor in vnfFunction.all_neighbors():
-            resAcc += ranSlices.vp.resourceCapacity[vnfFunctionNeighbor]
+            resAcc += ranSlices.vp.resources[vnfFunctionNeighbor]
             
         ranSlices.vp.totalResourcesAcc[vnfFunction] = resAcc
     
     # Setting uy the Edge Properties
     for vnfEdge in ranSlices.edges():
-        ranSlices.edge_properties.bandwidth[vnfEdge] = 3
+        ranSlices.edge_properties.bandwidth[vnfEdge] = 2

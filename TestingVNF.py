@@ -6,22 +6,22 @@ import random
 import TotalNetwork as tn
 import matplotlib.pyplot as plt
 
-intervalFactor = 2
+intervalFactor = 5
 
 # (1) No. of vnf vs No. of succesfull mappings
 
 def testSuccMappings(algoType):
 
-    noRanSlices = tn.numRnSlices
+    noVnf = tn.numVnfFunctions
 
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
 
     for ctrVar in range(5):
 
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
         
         if algoType == 1:
@@ -37,7 +37,6 @@ def testSuccMappings(algoType):
         xOne.append(noVnf)
         yOne.append(numMappings)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -60,11 +59,11 @@ def testUnsuccMappings(algoType):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
 
     for ctrVar in range(5):
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
         if algoType == 1:
@@ -79,7 +78,6 @@ def testUnsuccMappings(algoType):
         xOne.append(noVnf)
         yOne.append(noVnf - numMappings)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -101,11 +99,11 @@ def testAvailRes(algoType):
 
     xOne = []
     yOne = []
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
 
     for ctrVar in range(5):
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
         if algoType == 1:
@@ -121,7 +119,6 @@ def testAvailRes(algoType):
         resAvail = tn.sbsAvailableRes(totalNetwork)
         yOne.append(resAvail)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()
@@ -143,12 +140,12 @@ def testExhaustRes(algoType):
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
 
     for ctrVar in range(5):
         
         # One
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
         totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
             
         if algoType == 1:
@@ -165,7 +162,6 @@ def testExhaustRes(algoType):
         resAvail = tn.sbsAvailableRes(totalNetwork)
         yOne.append(tn.numSubsNodes*tn.resCtPerSbs - resAvail)
 
-        substrateNetwork.clear()
         ranSlices.clear()
         totalNetwork.clear()
         tn.resList.clear()

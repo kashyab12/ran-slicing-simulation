@@ -3,6 +3,7 @@ from graph_tool.all import *
 import math
 import random
 from matplotlib import pyplot as plt
+import TotalNetwork as tn
 
 # Function defined to create an RAN Slice
 
@@ -38,28 +39,55 @@ def setRANSliceProperties(ranSlices):
 
 
 # Function to Set the Properties for the VNF Functions
-def setVNFFunctionProperties(ranSlices, resList, sliceNumber = 1):
+def setVNFFunctionProperties(ranSlices, resList, sliceNumber = 1, vnfList = [], band = 2):
 
     loopIter = 0
-    
-    # Setting up the Vertex Properties
-    for vnfFunction in ranSlices.vertices():
-        ranSlices.vp.graphName[vnfFunction] = "RAN" + str(sliceNumber)
-        ranSlices.vertex_properties.resourceCapacity[vnfFunction] = -1   
-        ranSlices.vertex_properties.resources[vnfFunction] = resList[loopIter]
-        ranSlices.vertex_properties.binaryMappingVar[vnfFunction] = 0
-        ranSlices.vertex_properties.degree[vnfFunction] = len(ranSlices.get_all_neighbors(vnfFunction))
-        loopIter += 1
-    
-    # Setting up the totalResources per vertex
-    for vnfFunction in ranSlices.vertices():
-        resAcc = ranSlices.vp.resources[vnfFunction]
-            
-        for vnfFunctionNeighbor in vnfFunction.all_neighbors():
-            resAcc += ranSlices.vp.resources[vnfFunctionNeighbor]
-            
-        ranSlices.vp.totalResourcesAcc[vnfFunction] = resAcc
-    
-    # Setting uy the Edge Properties
-    for vnfEdge in ranSlices.edges():
-        ranSlices.edge_properties.bandwidth[vnfEdge] = 2
+
+    if vnfList:
+        # Setting up the Vertex Properties
+        for vnfFunction in vnfList:
+            ranSlices.vp.graphName[vnfFunction] = "RAN" + str(sliceNumber)
+            ranSlices.vertex_properties.resourceCapacity[vnfFunction] = -1   
+            ranSlices.vertex_properties.resources[vnfFunction] = tn.resCtPerVnf + tn.randUpBoundVnf
+            ranSlices.vertex_properties.binaryMappingVar[vnfFunction] = 0
+            ranSlices.vertex_properties.degree[vnfFunction] = len(ranSlices.get_all_neighbors(vnfFunction))
+            loopIter += 1
+        
+        # Setting up the totalResources per vertex
+        for vnfFunction in vnfList:
+            resAcc = ranSlices.vp.resources[vnfFunction]
+                
+            for vnfFunctionNeighbor in vnfFunction.all_neighbors():
+                resAcc += ranSlices.vp.resources[vnfFunctionNeighbor]
+                
+            ranSlices.vp.totalResourcesAcc[vnfFunction] = resAcc
+        
+        new_edges = find_edge(ranSlices, ranSlices.ep.bandwidth, 0)
+
+        # Setting uy the Edge Properties
+        for vnfEdge in new_edges:
+            if ranSlices.vp.binaryMappingVar[vnfEdge.source()] != 1 and ranSlices.vp.binaryMappingVar[vnfEdge.target()] != 1:
+                ranSlices.edge_properties.bandwidth[vnfEdge] = band
+
+    else:
+        # Setting up the Vertex Properties
+        for vnfFunction in ranSlices.vertices():
+            ranSlices.vp.graphName[vnfFunction] = "RAN" + str(sliceNumber)
+            ranSlices.vertex_properties.resourceCapacity[vnfFunction] = -1   
+            ranSlices.vertex_properties.resources[vnfFunction] = resList[loopIter]
+            ranSlices.vertex_properties.binaryMappingVar[vnfFunction] = 0
+            ranSlices.vertex_properties.degree[vnfFunction] = len(ranSlices.get_all_neighbors(vnfFunction))
+            loopIter += 1
+        
+        # Setting up the totalResources per vertex
+        for vnfFunction in ranSlices.vertices():
+            resAcc = ranSlices.vp.resources[vnfFunction]
+                
+            for vnfFunctionNeighbor in vnfFunction.all_neighbors():
+                resAcc += ranSlices.vp.resources[vnfFunctionNeighbor]
+                
+            ranSlices.vp.totalResourcesAcc[vnfFunction] = resAcc
+        
+        # Setting uy the Edge Properties
+        for vnfEdge in ranSlices.edges():
+            ranSlices.edge_properties.bandwidth[vnfEdge] = band

@@ -1,14 +1,18 @@
 from graph_tool.all import *
 import numpy as np
 import random
+import TotalNetwork as tn
 
 def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
     
+    resList = tn.getUpdatedResList(totalNetwork)
+    resCapList = tn.getUpdatedResList(totalNetwork, layer="Substrate")
     sortedResValList = sorted(resList, reverse=greedy_method)
     sortedSbsValList = sorted(resCapList, reverse=greedy_method)
     sbsFoundVertex = 0
     numOfMappings = 0
     ranFoundVertex = 0
+    
 
     for vnfResourceValue in sortedResValList:
 
@@ -25,8 +29,8 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
                 del ranFoundVertex[ctrVar]
                 ctrVar -= 1
 
-        if not ranFoundVertex:
-            print("Empty List of Found VNF Functions")
+        if not ranFoundVertex or type(ranFoundVertex) == list:
+            # print("Empty List of Found VNF Functions")
             continue
         else:
             isNeighborMapped = False
@@ -41,7 +45,7 @@ def algorithmOne(totalNetwork, resList, resCapList, greedy_method):
             # Case One
             if isNeighborMapped == False:
 
-                if sortedSbsValList[0] >= totalNetwork.vp.resourceCapacity[ranFoundVertex]:
+                if sortedSbsValList[0] >= totalNetwork.vp.resources[ranFoundVertex]:
                     sbsFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.resourceCapacity, sortedSbsValList[0])
                     foundSbsVert = True
                 else:

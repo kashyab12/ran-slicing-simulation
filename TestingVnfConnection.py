@@ -6,34 +6,32 @@ import random
 import TotalNetwork as tn
 import matplotlib.pyplot as plt
 
-intervalFactor = -1
-
 # (1) No. of Connections Sbs vs No. of Succesfull Mapings 
 
-def testSuccMappings(algoType, connectivityVnf):
+def testSuccMappings(algoType, connectivityVnf= tn.vnfDegree, intervalFactor = tn.intervalFactor, iterations=tn.iterCount):
 
-    connectivity = connectivityVnf
+    connectivity = tn.vnfDegree
 
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, connectivity=tn.sbsDegree, random_range=tn.randUpBound)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity, random_range=0)
+        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices)
             
         if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
+            numMappings = tn.algoOneTest(totalNetwork)
         elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
+            numMappings = tn.algoTwoTest(totalNetwork)
         elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
+            numMappings = tn.algoThreeTest(totalNetwork)
         else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
+            numMappings = tn.algoFourTest(totalNetwork)
 
         xOne.append(connectivity)
         yOne.append(numMappings)
@@ -51,30 +49,30 @@ def testSuccMappings(algoType, connectivityVnf):
 
 # (2) No. of Connections Sbs vs No. of UnSuccesfull Mapings 
 
-def testUnsuccMappings(algoType, connectivityVnf):
+def testUnsuccMappings(algoType, connectivityVnf= tn.vnfDegree, intervalFactor = tn.intervalFactor, iterations=tn.iterCount):
 
     connectivity = connectivityVnf
 
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, connectivity=tn.sbsDegree, random_range=tn.randUpBound)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity, random_range=0)
+        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices)
             
         if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
+            numMappings = tn.algoOneTest(totalNetwork)
         elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
+            numMappings = tn.algoTwoTest(totalNetwork)
         elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
+            numMappings = tn.algoThreeTest(totalNetwork)
         else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
+            numMappings = tn.algoFourTest(totalNetwork)
 
         xOne.append(connectivity)
         yOne.append(tn.numVnfFunctions - numMappings)
@@ -93,30 +91,30 @@ def testUnsuccMappings(algoType, connectivityVnf):
 
 # (3) No. of Connections Sbs vs Amount of Sbs. Resouces Unused.
 
-def testAvailRes(algoType, connectivityVnf):
+def testAvailRes(algoType, connectivityVnf= tn.vnfDegree, intervalFactor = tn.intervalFactor, iterations=tn.iterCount):
 
     connectivity = connectivityVnf
 
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, connectivity=tn.sbsDegree, random_range=tn.randUpBound)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity, random_range=0)
+        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices)
             
         if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
+            numMappings = tn.algoOneTest(totalNetwork)
         elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
+            numMappings = tn.algoTwoTest(totalNetwork)
         elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
+            numMappings = tn.algoThreeTest(totalNetwork)
         else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
+            numMappings = tn.algoFourTest(totalNetwork)
         
         avRes = tn.sbsAvailableRes(totalNetwork)
         xOne.append(connectivity)
@@ -136,30 +134,30 @@ def testAvailRes(algoType, connectivityVnf):
 
 # (4) No. of Connections Sbs vs Amount of Sbs. Resouces Exhausted
 
-def testExhaustRes(algoType, connectivityVnf):
+def testExhaustRes(algoType, connectivityVnf= tn.vnfDegree, intervalFactor = tn.intervalFactor, iterations=tn.iterCount):
 
     connectivity = connectivityVnf
 
     xOne = []
     yOne = []
 
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 3)
+    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, connectivity=tn.sbsDegree, random_range=tn.randUpBound)
 
-    for ctrVar in range(5):
+    for ctrVar in range(iterations):
         
         # One
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
+        ranSlices = tn.createRANSlice(tn.numRnSlices, tn.numVnfFunctions, tn.resList, tn.resCtPerVnf, connectivity, random_range=0)
+        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices)
             
         if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
+            numMappings = tn.algoOneTest(totalNetwork)
         elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
+            numMappings = tn.algoTwoTest(totalNetwork)
         elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
+            numMappings = tn.algoThreeTest(totalNetwork)
         else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
+            numMappings = tn.algoFourTest(totalNetwork)
             
         avRes = tn.sbsAvailableRes(totalNetwork)
         xOne.append(connectivity)

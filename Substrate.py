@@ -1,6 +1,7 @@
 from graph_tool.all import *
 import matplotlib.pyplot as ppt
 import random
+import TotalNetwork as tn
 
 def setSbsNetworkProperties(substrateNetwork):
     # Creating Properties for the Substrate Network
@@ -33,34 +34,59 @@ def setSbsNetworkProperties(substrateNetwork):
 
     
 
-def setSbsTowerProperties(substrateNetwork, resCapList):
+def setSbsTowerProperties(substrateNetwork, resCapList, band = tn.sbsBandValue, sbsNodes = []):
 
     loopIter = 0
 
-    # Setting up Graph Property
+    if len(sbsNodes) != 0:
+        for node in sbsNodes:
+            substrateNetwork.vp.graphName[node] = "Substrate"
+            substrateNetwork.vp.resourceCapacity[node] = tn.resCtPerSbs + tn.randUpBoundSbs
+            substrateNetwork.vp.resources[node] = -1
+            substrateNetwork.vp.binaryMappingVar[node] = -1
+            substrateNetwork.vp.degree[node] = len(substrateNetwork.get_all_neighbors(node))
+            loopIter += 1
 
-    # Setting up Vertex Properties
-
-    for sbsTower in substrateNetwork.vertices():
-        substrateNetwork.vp.graphName[sbsTower] = "Substrate"
-        substrateNetwork.vp.resourceCapacity[sbsTower] = resCapList[loopIter]
-        substrateNetwork.vp.resources[sbsTower] = -1
-        substrateNetwork.vp.binaryMappingVar[sbsTower] = -1
-        substrateNetwork.vp.degree[sbsTower] = len(substrateNetwork.get_all_neighbors(sbsTower))
-        loopIter += 1
-
-    # Setting up the totalResources per vertex
-    for sbsTower in substrateNetwork.vertices():
-        resAcc = substrateNetwork.vp.resourceCapacity[sbsTower]
+        # Setting up the totalResources per vertex
+        for node in sbsNodes:
+            resAcc = substrateNetwork.vp.resourceCapacity[node]
+            
+            for neighborNode in node.all_neighbors():
+                resAcc += substrateNetwork.vp.resourceCapacity[neighborNode]
+            
+            substrateNetwork.vp.totalResourcesAcc[node] = resAcc
         
-        for sbsTowerNeighbor in sbsTower.all_neighbors():
-            resAcc += substrateNetwork.vp.resourceCapacity[sbsTowerNeighbor]
-        
-        substrateNetwork.vp.totalResourcesAcc[sbsTower] = resAcc
-    
-    # Setting up Edge Properties
+        # Setting up Edge Properties
 
-    for sbsEdges in substrateNetwork.edges():
-        substrateNetwork.edge_properties.bandwidth[sbsEdges] = 5
+        newEdges = find_edge(substrateNetwork, substrateNetwork.ep.bandwidth, 0)
+
+        for edges in newEdges:
+            if substrateNetwork.vp.binaryMappingVar[edges.target()] == -1 and substrateNetwork.vp.binaryMappingVar[edges.source()] == -1:
+                substrateNetwork.edge_properties.bandwidth[edges] = band
+
+    else:
+        # Setting up Vertex Properties
+
+        for sbsTower in substrateNetwork.vertices():
+            substrateNetwork.vp.graphName[sbsTower] = "Substrate"
+            substrateNetwork.vp.resourceCapacity[sbsTower] = resCapList[loopIter]
+            substrateNetwork.vp.resources[sbsTower] = -1
+            substrateNetwork.vp.binaryMappingVar[sbsTower] = -1
+            substrateNetwork.vp.degree[sbsTower] = len(substrateNetwork.get_all_neighbors(sbsTower))
+            loopIter += 1
+
+        # Setting up the totalResources per vertex
+        for sbsTower in substrateNetwork.vertices():
+            resAcc = substrateNetwork.vp.resourceCapacity[sbsTower]
+            
+            for sbsTowerNeighbor in sbsTower.all_neighbors():
+                resAcc += substrateNetwork.vp.resourceCapacity[sbsTowerNeighbor]
+            
+            substrateNetwork.vp.totalResourcesAcc[sbsTower] = resAcc
+        
+        # Setting up Edge Properties
+
+        for sbsEdges in substrateNetwork.edges():
+            substrateNetwork.edge_properties.bandwidth[sbsEdges] = band
 
         

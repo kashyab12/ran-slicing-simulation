@@ -1,0 +1,5 @@
+Bandwidth Deficit for SubstrateX-Values - [60, 80, 100, 120, 140]
+Algo One - [80, 100, 120, 136, 136]
+Algo Two - [80, 100, 120, 140, 141]
+Algo Three - [80, 100, 120, 137, 138]
+Algo Four - [62, 100, 120, 139, 139]

@@ -7,17 +7,28 @@ import AlgorithmFour as algoFour
 from graph_tool.all import *
 import random
 
+iterCount = 5
+randUpBoundSbs = -2
+randUpBoundVnf = 4
+intervalFactor = 20
+varSbsDeg = 2
+varSbsBand = -2
+
 # Substrate Global Variables
-numSubsNodes = 25
+numSubsNodes = 60
 resCapList = []
 resCtPerSbs = 4
+sbsDegree = 4
 substrateNetwork = 0
+sbsBandValue = 5
 
 # RAN Global Variables
 ranSlices = 0
 resList = []
 numRnSlices = 1
-numVnfFunctions = 60
+vnfBandValue = 3
+vnfDegree = 2
+numVnfFunctions = 200
 resCtPerVnf = 2
 vnfCncList = []
 vnfTotalAccList = []
@@ -25,13 +36,13 @@ vnfTotalAccList = []
 # Other Global
 totalNetwork = 0
 
-def createSbsNetwork(numSubsNodes= 10, resCapList = [], resCtPerSbs=4, connectivity=2): # Default Parameters
+def createSbsNetwork(numSubsNodes= 10, resCapList = [], resCtPerSbs=4, connectivity=2, random_range = randUpBoundSbs): # Default Parameters
     # substrateNetwork = random_graph(numSubsNodes, randomDegreeSbs, directed=False, parallel_edges=False, self_loops=False, random=True)
     # substrateNetwork = complete_graph(numSubsNodes, self_loops=False, directed=False)
     substrateNetwork = circular_graph(numSubsNodes, k= connectivity, self_loops=False, directed=False)
 
     for idx in range(numSubsNodes):
-        resCapList.append(random.randint(resCtPerSbs, resCtPerSbs+2)) #+2
+        resCapList.append(random.randint(resCtPerSbs, resCtPerSbs + random_range)) #+2
 
     sbs.setSbsNetworkProperties(substrateNetwork)
     sbs.setSbsTowerProperties(substrateNetwork, resCapList)
@@ -41,7 +52,7 @@ def createSbsNetwork(numSubsNodes= 10, resCapList = [], resCtPerSbs=4, connectiv
 
 # Setting up the RAN Slice
 
-def createRANSlice(numRnSlices = 1, numVnfFunctions = 10, resList = [], resCtPerVnf = 2, connectivity = 2):
+def createRANSlice(numRnSlices = 1, numVnfFunctions = 10, resList = [], resCtPerVnf = 2, connectivity = 2, random_range =randUpBoundVnf):
 
     # for loopIter in range(numRnSlices):
     # ranSlices.append(random_graph(numVnfFunctions, randomDegreeVnf, directed=False, parallel_edges=False, self_loops=False, random=True))
@@ -56,7 +67,7 @@ def createRANSlice(numRnSlices = 1, numVnfFunctions = 10, resList = [], resCtPer
         ranSlice = circular_graph(numVnfFunctions, k= connectivity, self_loops=False, directed=False)
 
         for idx in range(numVnfFunctions):
-            resList.append(random.randint(resCtPerVnf, resCtPerVnf+2)) # +2
+            resList.append(random.randint(resCtPerVnf, resCtPerVnf)) # +2
 
         ran.setRANSliceProperties(ranSlice)
         ran.setVNFFunctionProperties(ranSlice, resList, loopIter)
@@ -77,11 +88,12 @@ def createTotalNetwork(substrateNetwork, ranSlices,  vnfCncList = [], vnfTotalAc
     totalNetwork = graph_union(totalNetwork, ranSlices, include = True, internal_props=True)
 
     # Testing the Created Network
-    graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resources"), output="Graph-Figures/test_total_one.png", output_size= (1920, 1080))
+    graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("resourceCapacity"), output="Graph-Figures/test_total_resCap.png", output_size= (1920, 1080))
+    graph_draw(totalNetwork, vertex_text = totalNetwork.vertex_properties.get("binaryMappingVar"), output="Graph-Figures/test_total_binaryMapVar.png", output_size= (1920, 1080))
 
     vnfCncList = getUpdatedCncList(totalNetwork)
     vnfTotalAccList = getUpdatedResourcesAcc(totalNetwork)
-        
+
     return totalNetwork;
 
 
@@ -107,7 +119,6 @@ def getUpdatedResourcesAcc(totalNetwork, layer = "RAN"):
             totalNetwork.vp.totalResourcesAcc[node] = resAcc
             resAccList.append(resAcc)
 
-        
     elif layer == "Substrate": # Substrate Towers
 
         sbsList = getLayerList(totalNetwork, layer = "Substrate")
@@ -141,7 +152,7 @@ def resetNetwork(totalNetwork, substrateNetwork, ranSlices):
     totalNetwork = graph_union(totalNetwork, substrateNetwork, include = True, internal_props=True)
     totalNetwork = graph_union(totalNetwork, ranSlices, include = True, internal_props=True)
 
-def algoOneTest(totalNetwork, substrateNetwork, ranSlices = 1, resList = [], resCapList = []):
+def algoOneTest(totalNetwork, substrateNetwork = Graph(directed=False), ranSlices = Graph(directed=False), resList = [], resCapList = []):
 
     resList = getUpdatedResList(totalNetwork)
     resCapList = getUpdatedResList(totalNetwork, layer = "Substrate")
@@ -198,13 +209,13 @@ def getLayerList(totalNetwork, layer ="RAN"):
     if layer == "RAN":
 
         for node in totalNetwork.vertices():
-            if totalNetwork.binaryMappingVar[node] >= 0:
+            if totalNetwork.vp.binaryMappingVar[node] >= 0:
                 layerList.append(node)
 
     elif layer == "Substrate":
 
         for node in totalNetwork.vertices():
-            if totalNetwork.binaryMappingVar[node] < 0:
+            if totalNetwork.vp.binaryMappingVar[node] < 0:
                 layerList.append(node)
 
     else:
@@ -264,9 +275,9 @@ def algoThreeTest(totalNetwork, vnfTotalAccList = []):
     
     return neighborhoodMappingTwo;
 
-def algoFourTest(totalNetwork, substrateNetwork, ranSlices = 1, resCapList = [], vnfCncList = []):
+def algoFourTest(totalNetwork, substrateNetwork = Graph(directed=False), ranSlices = Graph(directed=False), resCapList = [], vnfCncList = []):
 
-    resCapList = getResList(totalNetwork, layer = "substrate")
+    resCapList = getUpdatedResList(totalNetwork, layer = "Substrate")
     vnfCncList = getUpdatedCncList(totalNetwork)
     
     # Testing Algorithm One 
@@ -304,3 +315,11 @@ def sbsAvailableRes(totalNetwork):
         resAvail += totalNetwork.vp.resourceCapacity[sbsTower]
     
     return resAvail;
+
+def updateVnfMapVar(totalNetwork, ranSlices = 0):
+
+    # Trying to update the ranSlices network with the Total Network
+    
+    for networkNode in totalNetwork.vertices():
+        if totalNetwork.vp.binaryMappingVar[networkNode] == 2 or totalNetwork.vp.binaryMappingVar[networkNode] == 3:
+            totalNetwork.vp.binaryMappingVar[networkNode] = 0

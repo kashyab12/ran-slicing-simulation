@@ -1,9 +1,12 @@
 from graph_tool.all import *
 import numpy as np
 import random
+import TotalNetwork as tn
 
-def algorithmFour(totalNetwork, resCapList, vnfCncList, greedy_method):
+def algorithmFour(totalNetwork, resCapList, vnfCncList, greedy_method=True):
     
+    vnfCncList = tn.getUpdatedCncList(totalNetwork)
+    resCapList = tn.getUpdatedResList(totalNetwork, layer="Substrate")
     sortedVnfCncList = sorted(vnfCncList, reverse=greedy_method)
     sortedSbsValList = sorted(resCapList, reverse=greedy_method)
 
@@ -13,7 +16,7 @@ def algorithmFour(totalNetwork, resCapList, vnfCncList, greedy_method):
 
     for vnfCncVal in sortedVnfCncList:
 
-        print("Num of Mapping Al")
+        # print("Num of Mapping Al")
 
         foundSbsVert = False
         ranFoundVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, vnfCncVal)
@@ -27,9 +30,10 @@ def algorithmFour(totalNetwork, resCapList, vnfCncList, greedy_method):
         for vnfFunction in optimalRan:
             if totalNetwork.vp.resources[vnfFunction] > maxVnfRes:
                 ranFoundVertex = vnfFunction
+                break
 
-        if not ranFoundVertex:
-            print("Empty List of Found VNF Functions")
+        if not ranFoundVertex or type(ranFoundVertex) == list:
+            # print("Empty List of Found VNF Functions")
             continue
         else:
             isNeighborMapped = False

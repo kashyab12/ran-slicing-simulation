@@ -1,10 +1,12 @@
 from graph_tool.all import *
 import numpy as np
+import TotalNetwork as tn
 import random
 
 def algorithmTwo(totalNetwork, vnfCncList):
     
     # Sorting the list of maximal connections for the VNF Functions
+    vnfCncList = tn.getUpdatedCncList(totalNetwork)
     sortedVnfCncList = sorted(vnfCncList, reverse=True)
     sbsFoundVertex = 0
     ranFoundVertex = 0
@@ -41,7 +43,8 @@ def algorithmTwo(totalNetwork, vnfCncList):
         maximalConnectedVnfs.append(maxCncList)
     
     for vertex in totalNetwork.vertices():
-        totalNetwork.vp.binaryMappingVar[vertex] = 0
+        if totalNetwork.vp.binaryMappingVar[vertex] == 3 or totalNetwork.vp.binaryMappingVar[vertex] == 2 :
+            totalNetwork.vp.binaryMappingVar[vertex] = 0
 
     # Step Two - Mapping the Neighborhoods
 
@@ -98,7 +101,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                         updateList.append(neighbors)
 
                     for updateVnfFunction in updateList:
-                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[ranFoundVertex]
+                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.resources[ranFoundVertex]
 
                     if isFirst:
                         print("The failure is the first")
@@ -114,7 +117,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                     if (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) >= 0:
                         sbsPositiveDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                         sbsNegativeDifference.append(-1000000)
-                    elif (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) <= 0:
+                    elif (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) < 0:
                         sbsNegativeDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                         sbsPositiveDifference.append(1000000)
 
@@ -146,6 +149,9 @@ def algorithmTwo(totalNetwork, vnfCncList):
                 # Must Update the Total Resources Acc For Sbs Tower and Its Neighbors
                 updateSbsList = []
                 updateSbsList.append(sbsFoundVertex)
+                
+                for neighbors in sbsFoundVertex.all_neighbors():
+                    updateSbsList.append(neighbors)
 
                 for updateFunction in updateSbsList:
                     totalNetwork.vp.totalResourcesAcc[updateFunction] -= totalNetwork.vp.resources[ranFoundVertex]
@@ -214,7 +220,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                         updateList.append(neighbors)
 
                     for updateVnfFunction in updateList:
-                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[ranFoundVertex]
+                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.resources[ranFoundVertex]
 
                     if isFirst:
                         print("The failure is the first")
@@ -253,7 +259,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                         updateList.append(neighbors)
 
                     for updateVnfFunction in updateList:
-                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[ranFoundVertex]
+                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.resources[ranFoundVertex]
 
                     if isFirst:
                         print("The failure is the first")
@@ -346,7 +352,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                         updateList.append(neighbors)
 
                     for updateVnfFunction in updateList:
-                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.totalResourcesAcc[ranFoundVertex]
+                        totalNetwork.vp.totalResourcesAcc[updateVnfFunction] -= totalNetwork.vp.resources[ranFoundVertex]
 
                     if isFirst:
                         print("The failure is the first")
@@ -366,7 +372,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                     if (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) >= 0:
                         sbsPositiveDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                         sbsNegativeDifference.append(-1000000)
-                    elif (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) <= 0:
+                    elif (totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex]) < 0:
                         sbsNegativeDifference.append(totalNetwork.vp.totalResourcesAcc[sbsTower] - totalNetwork.vp.totalResourcesAcc[ranFoundVertex])
                         sbsPositiveDifference.append(1000000)
 
@@ -400,6 +406,9 @@ def algorithmTwo(totalNetwork, vnfCncList):
                 # Must Update the Total Resources Acc For Sbs Tower and Its Neighbors
                 updateSbsList = []
                 updateSbsList.append(sbsFoundVertex)
+                
+                for neighbors in sbsFoundVertex.all_neighbors():
+                    updateSbsList.append(neighbors)
 
                 for updateFunction in updateSbsList:
                     totalNetwork.vp.totalResourcesAcc[updateFunction] -= totalNetwork.vp.resources[ranFoundVertex]

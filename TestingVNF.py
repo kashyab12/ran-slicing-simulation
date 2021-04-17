@@ -5,171 +5,89 @@ from graph_tool.all import *
 import random
 import TotalNetwork as tn
 import matplotlib.pyplot as plt
-
-intervalFactor = 5
+import RAN_Slice as ran
 
 # (1) No. of vnf vs No. of succesfull mappings
 
-def testSuccMappings(algoType):
+def testParameters(algoType, subsNetwork, rnSlices, intervalFactor = tn.intervalFactor, iterations = tn.iterCount):
 
     noVnf = tn.numVnfFunctions
-
+    substrateNetwork = subsNetwork
+    ranSlices = rnSlices
     xOne = []
     yOne = []
-
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
-
-    for ctrVar in range(5):
-
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
-        
-        if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
-        elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
-        elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
-        else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
-        
-        
-        xOne.append(noVnf)
-        yOne.append(numMappings)
-
-        ranSlices.clear()
-        totalNetwork.clear()
-        tn.resList.clear()
-        tn.vnfCncList.clear()
-        tn.vnfTotalAccList.clear()
-        
-        noVnf += intervalFactor
-
-    returnData = [xOne, yOne]
-
-    return returnData;
+    yTwoUnsuccMappings = []
+    yThreeResourceAvail = []
+    yFourResourceExhuast = []   
     
+    totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices)
 
-# (2) No. of vnf vs No. of unsuccesfull mappings
+    for ctrVar in range(iterations):
+    
+        out = "Graph-Figures/debugVnf" + str(algoType) + str(ctrVar) +".png"
+        graph_draw(totalNetwork, vertex_text = totalNetwork.vp.get("resources"), bg_color=[1,1,1,1], output_size = (3840,2160), output=out)
 
-def testUnsuccMappings(algoType):
-
-    noVnf = tn.numVnfFunctions
-
-    xOne = []
-    yOne = []
-
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
-
-    for ctrVar in range(5):
-        
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
-            
         if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
+            numMappings = tn.algoOneTest(totalNetwork)
         elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
+            numMappings = tn.algoTwoTest(totalNetwork)
         elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
-        else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
+            numMappings = tn.algoThreeTest(totalNetwork)
+        elif algoType == 4:
+            numMappings = tn.algoFourTest(totalNetwork)
         
         xOne.append(noVnf)
-        yOne.append(noVnf - numMappings)
-
-        ranSlices.clear()
-        totalNetwork.clear()
-        tn.resList.clear()
-        tn.vnfCncList.clear()
-        tn.vnfTotalAccList.clear()
+        
+        if len(yOne) == 0:
+            yOne.append(numMappings)
+        else:
+            yOne.append(numMappings + yOne[-1])
+            
+        yTwoUnsuccMappings.append(noVnf - yOne[-1])
+        yThreeResourceAvail.append(tn.sbsAvailableRes(totalNetwork))
+        yFourResourceExhuast.append(tn.numSubsNodes*tn.resCtPerSbs - yThreeResourceAvail[-1])
+            
+        addVnf(ranSlices, intervalFactor, totalNetwork=totalNetwork)
+        tn.updateVnfMapVar(totalNetwork, ranSlices)
         
         noVnf += intervalFactor
 
-    returnData = [xOne, yOne]
+    returnData = [xOne, yOne, yTwoUnsuccMappings, yThreeResourceAvail, yFourResourceExhuast]
 
     return returnData;
 
+def addVnf(ranSlices, numVnfs, totalNetwork=0, connectivity = tn.vnfDegree):
 
-# (3) No. of vnf vs No. of Available Substrate Resources
+    vertices = []
+    ranSliceNodes = []
 
-def testAvailRes(algoType):
+    for node in totalNetwork.vertices():
+        if totalNetwork.vp.binaryMappingVar[node] != -1:
+            ranSliceNodes.append(node)
 
-    noVnf = tn.numVnfFunctions
+    for manyNodes in range(numVnfs):
+        vertices.append(totalNetwork.add_vertex())
+    
+    graph_draw(ranSlices, output = "Graph-Figures/Adding-Three.png", vertex_text = ranSlices.vp.get("resources"))
 
-    xOne = []
-    yOne = []
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
+    for newNode in vertices:
 
-    for ctrVar in range(5):
+        toMapVnf = 0
         
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
+        for numConnections in range(connectivity):
+
+            while True:
+
+                toMapVnf = random.choice(ranSliceNodes)
+
+                if toMapVnf not in newNode.all_neighbors() and toMapVnf != newNode:
+                    break
+                else:
+                    continue
             
-        if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
-        elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
-        elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
-        else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
-        
-        xOne.append(noVnf)
-        resAvail = tn.sbsAvailableRes(totalNetwork)
-        yOne.append(resAvail)
+            totalNetwork.add_edge(newNode, toMapVnf)
+            ranSliceNodes.append(newNode)
 
-        ranSlices.clear()
-        totalNetwork.clear()
-        tn.resList.clear()
-        tn.vnfCncList.clear()
-        tn.vnfTotalAccList.clear()
-        
-        noVnf += intervalFactor
+    ran.setVNFFunctionProperties(totalNetwork, tn.resList, vnfList=vertices)
 
-    returnData = [xOne, yOne]
-
-    return returnData;
-
-# (4) No. of vnf vs Amount of Exhausted Substrate Resources
-
-def testExhaustRes(algoType):
-
-    noVnf = tn.numVnfFunctions
-
-    xOne = []
-    yOne = []
-
-    substrateNetwork = tn.createSbsNetwork(tn.numSubsNodes, tn.resCapList, tn.resCtPerSbs, 2)
-
-    for ctrVar in range(5):
-        
-        # One
-        ranSlices = tn.createRANSlice(tn.numRnSlices, noVnf, tn.resList, tn.resCtPerVnf, 3)
-        totalNetwork  = tn.createTotalNetwork(substrateNetwork, ranSlices, tn.vnfCncList, tn.vnfTotalAccList)
-            
-        if algoType == 1:
-            numMappings = tn.algoOneTest(totalNetwork, substrateNetwork, ranSlices, tn.resList, tn.resCapList)
-        elif algoType == 2:
-            numMappings = tn.algoTwoTest(totalNetwork, tn.vnfCncList)
-        elif algoType == 3:
-            numMappings = tn.algoThreeTest(totalNetwork, tn.vnfTotalAccList)
-        else:
-            numMappings = tn.algoFourTest(totalNetwork, substrateNetwork, ranSlices, tn.resCapList, tn.vnfCncList)
-        
-        
-        xOne.append(noVnf)
-        resAvail = tn.sbsAvailableRes(totalNetwork)
-        yOne.append(tn.numSubsNodes*tn.resCtPerSbs - resAvail)
-
-        ranSlices.clear()
-        totalNetwork.clear()
-        tn.resList.clear()
-        tn.vnfCncList.clear()
-        tn.vnfTotalAccList.clear()
-        
-        noVnf += intervalFactor
-
-    returnData = [xOne, yOne]
-
-    return returnData;
+    graph_draw(ranSlices, output = "Graph-Figures/Adding-Four.png", vertex_text = ranSlices.vp.get("resources"))

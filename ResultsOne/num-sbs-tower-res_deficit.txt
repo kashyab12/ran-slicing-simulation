@@ -1,0 +1,5 @@
+Resource Deficit for SubstrateX-Values - [60, 80, 100, 120, 140]
+Algo One - [80, 100, 120, 137, 137]
+Algo Two - [80, 100, 120, 138, 139]
+Algo Three - [80, 100, 120, 140, 142]
+Algo Four - [62, 100, 120, 136, 137]

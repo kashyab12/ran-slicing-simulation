@@ -3,48 +3,85 @@ import numpy as np
 import TotalNetwork as tn
 import random
 
-def algorithmTwo(totalNetwork, vnfCncList):
+def algorithmTwo(totalNetwork, vnfCncList=[], failure=False):
+
+    print("Algorithm 2 Debug Log")
+    print("----------------------")
     
     # Sorting the list of maximal connections for the VNF Functions
-    vnfCncList = tn.getUpdatedCncList(totalNetwork)
+    if not failure:
+        vnf_list = [vnf for vnf in totalNetwork.vertices() if totalNetwork.vp.graphName[vnf][0] == 'v']
+        vnfCncList = []
+        
+        print("The VNF's in the vnf_list are - ")
+        
+        for vnf in vnf_list:    
+            print(str(totalNetwork.vp.graphName[vnf]) + "|||   ")
+        
+        for vnf in vnf_list:
+            vnfCncList.append(len(totalNetwork.get_all_neighbors(vnf)))
+    
+        print("The VNF's in the vnfCncList are - ")
+        for vnf in vnfCncList:    
+            print(str(totalNetwork.vp.graphName[vnf]) + "|||   ")
+        
+        print("The VNF's in Max Cnc Vertex are")
+        for vnf in sortedVnfCncList:
+            print(str(totalNetwork.vp.graphName[vnf]))
+        
     sortedVnfCncList = sorted(vnfCncList, reverse=True)
     sbsFoundVertex = 0
     ranFoundVertex = 0
     numOfMappings = 0
 
     # Step One - First store the Maximally connected VNFs and their Neighbors in a list of sets
-
-    maximalConnectedVnfs = []
-
-    for resVal in sortedVnfCncList:
-        maxCncVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, resVal)
-        loopIter = len(maxCncVertex) - 1
-        maxCncList = []
-
-        while loopIter >= 0:
-            if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertex[loopIter]] == 0:
-                maxCncVertex = maxCncVertex[loopIter]
-                break
-            else:
-                del maxCncVertex[loopIter]
-                loopIter -= 1
-
-        if not maxCncVertex:
-            print("Exception has been thrown! The max connected vertex is not found due to probably being mapped")
-            continue
-        else:
-            maxCncList.append(maxCncVertex)
-            totalNetwork.vp.binaryMappingVar[maxCncVertex] = 3
-
-        for maxCncVertexNeighbor in maxCncVertex.all_neighbors():
-            if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertexNeighbor] == 0:
-                maxCncList.append(maxCncVertexNeighbor)
-
-        maximalConnectedVnfs.append(maxCncList)
     
-    for vertex in totalNetwork.vertices():
-        if totalNetwork.vp.binaryMappingVar[vertex] == 3 or totalNetwork.vp.binaryMappingVar[vertex] == 2 :
-            totalNetwork.vp.binaryMappingVar[vertex] = 0
+    maximalConnectedVnfs = []
+    
+    if not failure:
+        for resVal in sortedVnfCncList:
+            maxCncVertex = find_vertex(totalNetwork, totalNetwork.vp.degree, resVal)
+            print("Max Cnc Vertex Elements - " + str(len(maxCncVertex)))
+            loopIter = len(maxCncVertex) - 1
+            maxCncList = []
+            
+            while loopIter >= 0:
+                if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertex[loopIter]] == 0:
+                    maxCncVertex = maxCncVertex[loopIter]
+                    break
+                else:
+                    del maxCncVertex[loopIter]
+                    loopIter -= 1
+    
+            if not maxCncVertex:
+                print("Exception has been thrown! The max connected vertex is not found due to probably being mapped (Step 1)")
+                continue
+            else:
+                maxCncList.append(maxCncVertex)
+                totalNetwork.vp.binaryMappingVar[maxCncVertex] = 3
+    
+            for maxCncVertexNeighbor in maxCncVertex.all_neighbors():
+                if totalNetwork.vertex_properties.binaryMappingVar[maxCncVertexNeighbor] == 0:
+                    maxCncList.append(maxCncVertexNeighbor)
+    
+            maximalConnectedVnfs.append(maxCncList)
+        
+        for vertex in totalNetwork.vertices():
+            if totalNetwork.vp.binaryMappingVar[vertex] == 3 or totalNetwork.vp.binaryMappingVar[vertex] == 2 :
+                totalNetwork.vp.binaryMappingVar[vertex] = 0
+    else:
+        
+        for vnf in vnfCncList:
+            neighborhood_list = []
+            neighborhood_list.append(vnf)
+            
+            for vnf_neighbor in totalNetwork.get_all_neighbors(vnf):
+                if totalNetwork.vp.binaryMappingVar[vnf_neighbor] >= 0:
+                    neighborhood_list.append(vnf_neighbor)
+                    
+            maximalConnectedVnfs.append(neighborhood_list)
+        
+        maximalConnectedVnfs = sorted(maximalConnectedVnfs, reverse=True)
 
     # Step Two - Mapping the Neighborhoods
 
@@ -71,16 +108,18 @@ def algorithmTwo(totalNetwork, vnfCncList):
             if totalNetwork.vp.binaryMappingVar[ranFoundVertex] == 2 or totalNetwork.vp.binaryMappingVar[ranFoundVertex] == 1:
                 continue
 
-            for neighbors in ranFoundVertex.all_neighbors():
+            for neighbors in totalNetwork.get_all_neighbors(ranFoundVertex):
                 if totalNetwork.vp.binaryMappingVar[neighbors] == 1:
                     isMainVnfMapped = True
                     break
                 else:
                     continue
+                    
 
             # If the vnf does not have a mapped neighbor
             if not isMainVnfMapped:
                 # Try to find the Sbs Tower which would be most appropriate
+                # print("Hereee")
                 sbsNetwork = find_vertex(totalNetwork, totalNetwork.vp.graphName, "Substrate")
 
                 # Find the Towers which can provide it with resources as well as Highest Insurance for its Neighbors
@@ -97,7 +136,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
                     updateList = []
                     updateList.append(ranFoundVertex)
 
-                    for neighbors in ranFoundVertex.all_neighbors():
+                    for neighbors in totalNetwork.get_all_neighbors(ranFoundVertex):
                         updateList.append(neighbors)
 
                     for updateVnfFunction in updateList:
@@ -234,8 +273,6 @@ def algorithmTwo(totalNetwork, vnfCncList):
 
                 for vertexIndex in possibleSbsTowers:
                     mappableSbsTowers.append(totalNetwork.vertex(vertexIndex))
-
-                print(len(mappableSbsTowers))
 
                 resRefinedMappable = []
 
@@ -415,4 +452,7 @@ def algorithmTwo(totalNetwork, vnfCncList):
 
                 isFirst = False
     
+    print("----------------------")
+    
     return numOfMappings;
+    
